@@ -24,4 +24,54 @@ table_with_na <- function(column) {
   return(tab)
 }
 table_with_na(dane$`Marital Status`)
+proportions <- data.frame(
+  kategorie = c(
+    "ID",
+    rep("Marital Status", length(table_with_na(dane$`Marital Status`))),
+    rep("Gender", length(table_with_na(dane$Gender))),
+    rep("Income", length(table_with_na(dane$IncomeCategory))),
+    rep("Children", length(table_with_na(dane$Children))),
+    rep("Education", length(table_with_na(dane$Education))),
+    rep("Occupation", length(table_with_na(dane$Occupation))),
+    rep("Home Owner", length(table_with_na(dane$`Home Owner`))),
+    rep("Cars", length(table_with_na(dane$CarsCategory))),
+    rep("Commute Distance", length(table_with_na(dane$`Commute Distance`))),
+    rep("Region", length(table_with_na(dane$Region))),
+    rep("Age", length(table_with_na(dane$AgeCategory))),
+    rep("Purchased Bike", length(table_with_na(dane$`Purchased Bike`)))
+  ),
+  odpowiedzi = c(
+    "Unique Records",
+    names(table_with_na(dane$`Marital Status`)),
+    names(table_with_na(dane$Gender)),
+    names(table_with_na(dane$IncomeCategory)),
+    names(table_with_na(dane$Children)),
+    names(table_with_na(dane$Education)),
+    names(table_with_na(dane$Occupation)),
+    names(table_with_na(dane$`Home Owner`)),
+    names(table_with_na(dane$CarsCategory)),
+    names(table_with_na(dane$`Commute Distance`)),
+    names(table_with_na(dane$Region)),
+    names(table_with_na(dane$AgeCategory)),
+    names(table_with_na(dane$`Purchased Bike`))
+  ),
+  liczba_obserwacji = c(
+    length(unique(dane$ID)),
+    as.vector(table_with_na(dane$`Marital Status`)),
+    as.vector(table_with_na(dane$Gender)),
+    as.vector(table_with_na(dane$IncomeCategory)),
+    as.vector(table_with_na(dane$Children)),
+    as.vector(table_with_na(dane$Education)),
+    as.vector(table_with_na(dane$Occupation)),
+    as.vector(table_with_na(dane$`Home Owner`)),
+    as.vector(table_with_na(dane$CarsCategory)),
+    as.vector(table_with_na(dane$`Commute Distance`)),
+    as.vector(table_with_na(dane$Region)),
+    as.vector(table_with_na(dane$AgeCategory)),
+    as.vector(table_with_na(dane$`Purchased Bike`))
+  )
+)
 
+# Wyświetlenie tabeli proporcji
+print(proportions)
+View(proportions)
