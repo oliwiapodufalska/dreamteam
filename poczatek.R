@@ -75,3 +75,22 @@ proportions <- data.frame(
 # Wyświetlenie tabeli proporcji
 print(proportions)
 View(proportions)
+
+# Sprawdzenie struktury danych
+str(dane)
+
+# Sprawdzenie typów danych w każdej kolumnie
+typy_danych <- sapply(dane, class)
+print(typy_danych)
+# Konwersja na factor dla zmiennych kategorycznych
+dane$`Marital Status` <- as.factor(dane$`Marital Status`)
+dane$Gender <- as.factor(dane$Gender)
+dane$Education <- as.factor(dane$Education)
+dane$Occupation <- as.factor(dane$Occupation)
+dane$`Home Owner` <- as.factor(dane$`Home Owner`)
+dane$`Commute Distance` <- as.factor(dane$`Commute Distance`)
+dane$Region <- as.factor(dane$Region)
+dane$`Purchased Bike` <- as.factor(dane$`Purchased Bike`)
+
+typy_danych <- sapply(dane, class)
+print(typy_danych)
