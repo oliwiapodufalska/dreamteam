@@ -101,11 +101,5 @@ dane$Age[is.na(dane$Age)] <- mean(dane$Age, na.rm = TRUE)
 dane$Children[is.na(dane$Children)] <- median(dane$Children, na.rm = TRUE)
 dane$Cars[is.na(dane$Cars)] <- median(dane$Cars, na.rm = TRUE)
 
-# Zastępowanie braków w zmiennych kategorycznych
-dane$`Marital Status`[is.na(dane$`Marital Status`)] <- names(which.max(table(dane$`Marital Status`, useNA = "no")))
-dane$Gender[is.na(dane$Gender)] <- names(which.max(table(dane$Gender, useNA = "no")))
-dane$`Home Owner`[is.na(dane$`Home Owner`)] <- names(which.max(table(dane$`Home Owner`, useNA = "no")))
 
-# Sprawdzenie, czy wszystkie braki zostały wypełnione
-colSums(is.na(dane))
 
