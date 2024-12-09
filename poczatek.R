@@ -94,3 +94,10 @@ dane$`Purchased Bike` <- as.factor(dane$`Purchased Bike`)
 
 typy_danych <- sapply(dane, class)
 print(typy_danych)
+
+# Zastępowanie braków w zmiennych liczbowych
+dane$Income[is.na(dane$Income)] <- median(dane$Income, na.rm = TRUE)
+dane$Age[is.na(dane$Age)] <- mean(dane$Age, na.rm = TRUE)
+dane$Children[is.na(dane$Children)] <- median(dane$Children, na.rm = TRUE)
+dane$Cars[is.na(dane$Cars)] <- median(dane$Cars, na.rm = TRUE)
+
