@@ -111,3 +111,75 @@ dane <- dane %>%
 install.packages("mice")
 library(mice)
 
+# Tworzenie modelu imputacji
+imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
+colnames(dane) <- make.names(colnames(dane))
+
+# Uzupełnienie braków
+dane <- complete(imputed_data)
+plot(imputed_data)  # Wizualizacja konwergencji imputacji
+library(dplyr)
+
+# Lista zmiennych kategorycznych
+categorical_vars <- c("Marital.Status", "Gender", "Home.Owner")
+
+
+# Zastępowanie braków dominantą
+dane <- dane %>%
+  mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
+
+colnames(dane)
+library(rpart)
+
+# Funkcja do imputacji zmiennych kategorycznych za pomocą drzewa decyzyjnego
+impute_with_tree <- function(data, target_var) {
+  fit <- rpart(as.formula(paste(target_var, "~ .")), data = data, method = "class", na.action = na.exclude)
+  data[[target_var]][is.na(data[[target_var]])] <- predict(fit, data[is.na(data[[target_var]]), ], type = "class")
+  return(data)
+}
+impute_with_tree 
+# Imputacja dla zmiennych kategorycznych
+for (var in categorical_vars) {
+  dane <- impute_with_tree(dane, var)
+}
+library(mice)
+
+# Ograniczenie do zmiennych kategorycznych
+categorical_data <- dane %>% select(all_of(categorical_vars))
+
+# Imputacja wielowymiarowa
+imputed_data <- mice(categorical_data, m = 5, method = "logreg", seed = 123)
+if (sum(is.na(dane)) == 0) {
+  cat("Braki zostały całkowicie usunięte.\n")
+} else {
+  cat("Pozostały braki w danych.\n")
+}
+
+# Zastąpienie braków
+dane[categorical_vars] <- complete(imputed_data)
+# Sprawdzenie braków po imputacji
+colSums(is.na(dane[categorical_vars]))
+str(dane)
+table(dane$Marital.Status)
+table(dane$Gender)
+table(dane$Home.Owner)
+library(ggplot2)
+
+# Marital.Status
+ggplot(dane, aes(x = Marital.Status)) +
+  geom_bar() +
+  labs(title = "Rozkład stanu cywilnego", x = "Stan cywilny", y = "Liczba osób")
+
+# Gender
+ggplot(dane, aes(x = Gender)) +
+  geom_bar() +
+  labs(title = "Rozkład płci", x = "Płeć", y = "Liczba osób")
+
+# Home.Owner
+ggplot(dane, aes(x = Home.Owner)) +
+  geom_bar() +
+  labs(title = "Rozkład własności domu", x = "Czy posiada dom", y = "Liczba osób")
+# Sprawdzenie, czy wszystkie braki zostały wypełnione
+colSums(is.na(dane))
+install.packages("tidyverse")
+install.packages("gcookbook")
