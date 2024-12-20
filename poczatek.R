@@ -1,5 +1,5 @@
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot"))
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor"))
 library(readr)
 library(naniar)
 library(dplyr)
@@ -11,6 +11,7 @@ library(summarytools)
 library(readr)
 library(purrr)
 library(ggcorrplot)
+library(janitor)
 
 # Import danych
 dane <- read_csv("sklep_rowerowy.csv")
@@ -224,5 +225,20 @@ ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3
            title = "Mapa korelacji zmiennych liczbowych", 
            colors = c("red", "white", "blue"))
 
+
+# Lista kombinacji zmiennych kategorycznych NIE DZIAŁA, NIE MA, SMUTNO TU
+
+
+#relacje liczbowe-kategoryczne, wykres pudelkowy 
+for (cat_var in categorical_vars) {
+  for (num_var in numerical_vars) {
+    ggplot(dane, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
+      geom_boxplot() +
+      labs(title = paste("Rozkład", num_var, "względem", cat_var),
+           x = cat_var, y = num_var) +
+      theme_minimal() +
+      ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
+  }
+}
 
 
