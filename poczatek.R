@@ -1,5 +1,5 @@
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart"))
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot"))
 library(readr)
 library(naniar)
 library(dplyr)
@@ -7,8 +7,10 @@ library(tidyr)
 library(ggplot2)
 library(mice)
 library(rpart)
-install.packages("readr")
+library(summarytools)
 library(readr)
+library(purrr)
+library(ggcorrplot)
 
 # Import danych
 dane <- read_csv("sklep_rowerowy.csv")
@@ -174,4 +176,53 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 # Sprawdzenie, czy wszystkie braki zostały wypełnione
 colSums(is.na(dane))
-```
+
+
+# TUTAJ NOWA CZĘŚĆ
+
+
+#statystyki opisowe
+dane %>%
+  summarise(across(where(is.numeric), list(
+    mean = \(x) mean(x, na.rm = TRUE),
+    median = \(x) median(x, na.rm = TRUE),
+    sd = \(x) sd(x, na.rm = TRUE)
+  )))
+
+#dla zmiennych kategorcznych 
+dane %>%
+  summarise(across(where(is.factor), ~ list(table(.))))
+
+#opcjonalnie summarytolls do podsumowania
+dfSummary(dane) %>%
+print(method = "pander", file = "podsumowanie_opisowe.html")
+
+#wizualizacja zmiennych kategorycznych 
+categorical_vars <- dane %>% select(where(is.factor)) %>% colnames()
+walk(categorical_vars, ~ {
+  ggplot(dane, aes_string(x = .x)) +
+    geom_bar(fill = "skyblue") +
+    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji") +
+    theme_minimal() +
+    ggsave(paste0(.x, "_barplot.png"))
+})
+
+#wizualizacja zmiennych kiczbowych
+numerical_vars <- dane %>% select(where(is.numeric)) %>% colnames()
+walk(numerical_vars, ~ {
+  ggplot(dane, aes_string(x = .x)) +
+    geom_histogram(bins = 30, fill = "blue", color = "white") +
+    labs(title = paste("Histogram zmiennej:", .x), x = .x, y = "Częstość") +
+    theme_minimal() +
+    ggsave(paste0(.x, "_histogram.png"))
+})
+
+
+#korelacja zmiennych liczbowych 
+cor_matrix <- cor(dane %>% select(where(is.numeric)), use = "complete.obs")
+ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3,
+           title = "Mapa korelacji zmiennych liczbowych", 
+           colors = c("red", "white", "blue"))
+
+
+
