@@ -1,3 +1,13 @@
+# Instalacja i załadowanie wszystkich wymaganych pakietów
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart"))
+library(readr)
+library(naniar)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(mice)
+library(rpart)
+install.packages("readr")
 library(readr)
 
 # Import danych
@@ -5,10 +15,6 @@ dane <- read_csv("sklep_rowerowy.csv")
 
 # Wyświetlenie kilku pierwszych wierszy
 head(dane)
-
-# Sprawdzenie liczby braków w każdej kolumnie
-install.packages("naniar")
-library(naniar)
 
 # Ustawienie poziomów dla zmiennych kategorycznych
 levels(dane$`Marital Status`) <- c("Married", "Single")
@@ -30,14 +36,10 @@ View(brak_summary)  # Otwiera podsumowanie w zakładce Viewer w RStudio
 # Liczba braków dla każdej kolumny
 na_counts <- miss_var_summary(dane)
 print(na_counts)
-install.packages("dplyr")
-library(dplyr)
 
 # Liczba unikatowych wartości w każdej kolumnie
 unique_value <- data.frame(liczba_unikatowych_wartosci = sapply(dane, n_distinct))
 print(unique_value)
-
-
 
 # Funkcja do liczenia proporcji dla zmiennych kategorycznych
 table_with_na <- function(column) {
@@ -58,8 +60,6 @@ proportions_all <- dane %>%
   select(where(is.factor)) %>%
   summarise(across(everything(), ~ list(table_with_na(.))))  # Zbiera proporcje dla każdej zmiennej
 print(proportions_all)
-install.packages("tidyr")
-library(tidyr)
 
 # Tworzenie tabeli proporcji z dplyr
 proportions <- dane %>%
@@ -69,8 +69,6 @@ proportions <- dane %>%
   unnest(Tabela)
 
 print(n=29, proportions)
-
-library(ggplot2)
 
 # Wizualizacja braków danych
 ggplot(na_counts, aes(x = variable, y = n_miss)) +
@@ -96,7 +94,7 @@ ggplot(missing_summary_df, aes(x = Zmienna, y = Braki)) +
   theme_minimal()
 
 # Konwersja wybranych kolumn na factor
-factor_cols <- c("`Marital Status`", "`Gender`", "`Education`", "`Occupation`", "`Home Owner`", "`Commute Distance`", "`Region`", "`Purchased Bike`")
+factor_cols <- c("Marital Status", "Gender", "Education", "Occupation", "Home Owner", "Commute Distance", "Region", "Purchased Bike")
 
 dane <- dane %>%
   mutate(across(all_of(factor_cols), as.factor))
@@ -114,11 +112,7 @@ dane <- dane %>%
     Cars = ifelse(is.na(Cars), mean(Cars, na.rm = TRUE, trim = 0.1), Cars)
   )
 
-install.packages("mice")
-library(mice)
-
 # Tworzenie modelu imputacji
-
 imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
 
 # Uzupełnienie braków
@@ -135,15 +129,7 @@ print(colnames(dane))
 dane <- dane %>%
   mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
 
-
-# Zastępowanie braków dominantą
-dane <- dane %>%
-  mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
-
-library(rpart)
-
 # Funkcja do imputacji zmiennych kategorycznych za pomocą drzewa decyzyjnego
-
 impute_with_tree <- function(data, target_var) {
   # Użycie backticków w formule, aby obsłużyć nazwy z spacjami
   fit <- rpart(as.formula(paste0("`", target_var, "` ~ .")), data = data, method = "class", na.action = na.exclude)
@@ -151,7 +137,6 @@ impute_with_tree <- function(data, target_var) {
   data[[target_var]][is.na(data[[target_var]])] <- predict(fit, data[is.na(data[[target_var]]), ], type = "class")
   return(data)
 }
-
 
 # Imputacja dla zmiennych kategorycznych
 for (var in categorical_vars) {
@@ -189,3 +174,4 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 # Sprawdzenie, czy wszystkie braki zostały wypełnione
 colSums(is.na(dane))
+```
