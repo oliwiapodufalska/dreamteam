@@ -1,0 +1,218 @@
+---
+title: "Analiza danych - sklep rowerowy"
+author: "Oliwia Podufalska, Miłosz Stańko, Marek Psyta"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Instalacja i załadowanie wszystkich wymaganych pakietów
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart"))
+library(readr)
+library(naniar)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(mice)
+library(rpart)
+
+```
+
+Ten projekt analizuje dane sklepu rowerowego, aby: uzupełnić brakujące dane, przeprowadzić wizualizacje danych.
+
+## Import danych
+
+```{r}
+library(readr)
+dane <- read_csv("sklep_rowerowy.csv")
+head(dane)
+str(dane)
+```
+
+## Ustawienie poziomów dla zmiennych kategorycznych
+W tej sekcji ustawiamy poziomy dla zmiennych kategorycznych, aby były bardziej czytelne i zgodne z oczekiwaniami analizy.
+**Marital Status**: Przyjmie wartości `Married` lub `Single`.
+**Gender**: Przyjmie wartości `Male` lub `Female`.
+**Home Owner**: Przyjmie wartości `Yes` lub `No`.
+
+```{r}
+# Ustawienie poziomów dla zmiennych kategorycznych
+levels(dane$`Marital Status`) <- c("Married", "Single")
+levels(dane$`Gender`) <- c("Male", "Female")
+levels(dane$`Home Owner`) <- c("No", "Yes")
+
+# Sprawdzenie struktury danych po modyfikacji
+str(dane)
+```
+
+## Analiza braków danych
+W tej sekcji analizujemy braki danych w zbiorze, wykorzystując wizualizacje i podsumowania.
+1. **Wizualizacja braków danych**: Funkcja `vis_miss()` z pakietu `naniar` pokazuje, które dane są brakujące w każdej kolumnie.
+2. **Podsumowanie braków**: Funkcja `miss_var_summary()` dostarcza liczbowego podsumowania brakujących wartości.
+3. **Klasteryzacja braków**: Użycie klasteryzacji, aby sprawdzić, czy braki w kolumnach są ze sobą powiązane.
+4. **Eksport wyników**: Wyniki są zapisane do zmiennej `brak_summary` oraz wyświetlane w konsoli i w zakładce Viewer.
+```{r}
+# Wizualizacja braków danych
+vis_miss(dane)
+# Podsumowanie braków w każdej kolumnie
+miss_var_summary(dane)
+vis_miss(dane, cluster = TRUE)  # Klasteryzacja braków, aby znaleźć powiązania między kolumnami
+brak_summary <- miss_var_summary(dane)
+print(brak_summary)
+View(brak_summary)  # Otwiera podsumowanie w zakładce Viewer w RStudio
+# Liczba braków dla każdej kolumny
+na_counts <- miss_var_summary(dane)
+print(na_counts)
+```
+## Obliczanie unikatowych wartości w każdej kolumnie
+Poniższy fragment kodu tworzy ramkę danych `unique_value`, która zawiera liczbę unikatowych wartości w każdej kolumnie ramki danych `dane`, gdzie zawarte są informacje na temat sklepu rowerowego. 
+```{r}
+unique_value <- data.frame(liczba_unikatowych_wartosci = sapply(dane, n_distinct))
+print(unique_value)
+```
+## Przekształcanie zmiennych kategorycznych
+W tej sekcji przekształcamy wybrane zmienne kategoryczne na typ `factor`. Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy, takich jak wizualizacja danych czy budowanie modeli statystycznych.
+```{r}
+table_with_na <- function(column) {
+  tab <- table(column, useNA = "ifany")  # Uwzględnienie braków danych
+  prop <- prop.table(tab) * 100  # Proporcje w procentach
+  data.frame(Odpowiedzi = names(tab), Liczba_Obserwacji = as.vector(tab), Proporcje = as.vector(prop))
+}
+
+dane <- dane %>%
+  mutate(
+    `Marital Status` = as.factor(`Marital Status`),
+    `Gender` = as.factor(`Gender`),
+    `Home Owner` = as.factor(`Home Owner`)
+  )
+```
+## Analiza zmiennych kategorycznych
+W tej sekcji obliczamy proporcje odpowiedzi dla każdej zmiennej kategorycznej w zbiorze danych.
+```{r}
+proportions <- dane %>%
+  select(where(is.factor)) %>%
+  summarise(across(everything(), ~ list(table_with_na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "Kategoria", values_to = "Tabela") %>%
+  unnest(Tabela)
+
+print(n=29, proportions)
+```
+## Wizualizacja braków danych
+W tej sekcji wizualizujemy liczbę brakujących wartości w każdej kolumnie danych. Dzięki temu można łatwo zobaczyć, które kolumny wymagają dalszego przetworzenia.
+```{r}
+ggplot(na_counts, aes(x = variable, y = n_miss)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Liczba braków danych w każdej kolumnie", x = "Kolumna", y = "Liczba braków") +
+  theme_minimal()
+
+```
+## Analiza braków w zmiennych kluczowych
+W tej sekcji koncentrujemy się na zmiennych kluczowych, które mają największy wpływ na dalszą analizę: 
+- **`Purchased Bike`**
+- **`Income`**
+- **`Age`**
+- **`Marital Status`**
+Najpierw obliczamy liczbę brakujących danych dla każdej z tych kolumn, a następnie wizualizujemy wyniki.
+```{r}
+required_columns <- c("`Purchased Bike`", "Income", "Age", "`Marital Status`")
+missing_summary <- sapply(required_columns, function(col) sum(is.na(dane[[col]])))
+print(missing_summary)
+missing_summary_df <- data.frame(
+  Zmienna = required_columns,
+  Braki = sapply(required_columns, function(col) sum(is.na(dane[[col]])))
+)
+
+ggplot(missing_summary_df, aes(x = Zmienna, y = Braki)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Liczba braków w zmiennych kluczowych", x = "Zmienna", y = "Liczba braków") +
+  theme_minimal()
+```
+## Konwersja wybranych kolumn na typ `factor`
+W tej sekcji dokonujemy konwersji wybranych kolumn w zbiorze danych na typ `factor`.
+```{r}
+factor_cols <- c("Marital Status", "Gender", "Education", "Occupation", "Home Owner", "Commute Distance", "Region", "Purchased Bike")
+dane <- dane %>%
+  mutate(across(all_of(factor_cols), as.factor))
+# Sprawdzenie typów danych po konwersji
+typy_danych <- sapply(dane, class)
+print(typy_danych)
+```
+## Uzupełnianie braków w danych
+
+Braki danych zostały uzupełnione różnymi metodami w zależności od typu zmiennych:
+1. **Zmienne liczbowe**: Uzupełniane za pomocą średniej adaptacyjnej.
+2. **Zmienne kategoryczne**: Uzupełniane za pomocą dominującej wartości (moda) lub imputacji wielowymiarowej (metoda `mice`).
+
+### Zastępowanie braków w zmiennych liczbowych
+Dla zmiennych liczbowych zastosowano średnią adaptacyjną (z obcięciem 10%) w celu uzupełnienia braków danych. Średnia adaptacyjna jest mniej podatna na wartości odstające niż standardowa średnia.
+```{r}
+dane <- dane %>%
+  mutate(
+    Income = ifelse(is.na(Income), mean(Income, na.rm = TRUE, trim = 0.1), Income),
+    Age = ifelse(is.na(Age), mean(Age, na.rm = TRUE, trim = 0.1), Age),
+    Children = ifelse(is.na(Children), mean(Children, na.rm = TRUE, trim = 0.1), Children),
+    Cars = ifelse(is.na(Cars), mean(Cars, na.rm = TRUE, trim = 0.1), Cars)
+  )
+```
+## Imputacja wielowymiarowa
+Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową. To zaawansowane podejście opiera się na przewidywaniu brakujących wartości na podstawie podobieństwa do istniejących danych.
+```{r}
+imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
+dane <- complete(imputed_data)
+plot(imputed_data)  # Wizualizacja konwergencji imputacji
+# Lista zmiennych kategorycznych bez backticków
+categorical_vars <- c("Marital Status", "Gender", "Home Owner")
+# Sprawdzenie nazw kolumn w danych
+print(colnames(dane))
+# Zastępowanie braków dominantą
+dane <- dane %>%
+  mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
+```
+## Uzupełnianie braków w danych kategorycznych
+```{r}
+# Imputacja wielowymiarowa dla zmiennych kategorycznych
+categorical_data <- dane %>% select(all_of(categorical_vars))
+imputed_data <- mice(categorical_data, m = 5, method = "logreg", seed = 123)
+dane[categorical_vars] <- complete(imputed_data)
+# Sprawdzenie braków po imputacji
+colSums(is.na(dane[categorical_vars]))
+str(dane)
+```
+### Metoda drzewa decyzyjnego
+```{r}
+# Funkcja do imputacji zmiennych kategorycznych za pomocą drzewa decyzyjnego
+impute_with_tree <- function(data, target_var) {
+  # Użycie backticków w formule, aby obsłużyć nazwy z spacjami
+  fit <- rpart(as.formula(paste0("`", target_var, "` ~ .")), data = data, method = "class", na.action = na.exclude)
+  # Imputacja brakujących wartości
+  data[[target_var]][is.na(data[[target_var]])] <- predict(fit, data[is.na(data[[target_var]]), ], type = "class")
+  return(data)
+}
+# Imputacja dla zmiennych kategorycznych
+for (var in categorical_vars) {
+  dane <- impute_with_tree(dane, var)
+}
+```
+## Wizualizacja danych kategorycznych
+Poniższe wykresy przedstawiają rozkłady danych dla wybranych zmiennych kategorycznych.
+```{r}
+# `Marital Status`
+ggplot(dane, aes(x = `Marital Status`)) +
+  geom_bar() +
+  labs(title = "Rozkład stanu cywilnego", x = "Stan cywilny", y = "Liczba osób")
+# `Gender`
+ggplot(dane, aes(x = `Gender`)) +
+  geom_bar() +
+  labs(title = "Rozkład płci", x = "Płeć", y = "Liczba osób")
+# `Home Owner`
+ggplot(dane, aes(x = `Home Owner`)) +
+  geom_bar() +
+  labs(title = "Rozkład własności domu", x = "Czy posiada dom", y = "Liczba osób")
+
+```
+
+
+
+
+
