@@ -31,10 +31,8 @@ str(dane)
 ```
 
 ## Ustawienie poziomów dla zmiennych kategorycznych
-W tej sekcji ustawiamy poziomy dla zmiennych kategorycznych, aby były bardziej czytelne i zgodne z oczekiwaniami analizy.
-**Marital Status**: Przyjmie wartości `Married` lub `Single`.
-**Gender**: Przyjmie wartości `Male` lub `Female`.
-**Home Owner**: Przyjmie wartości `Yes` lub `No`.
+
+W tej sekcji ustawiamy poziomy dla zmiennych kategorycznych, aby były bardziej czytelne i zgodne z oczekiwaniami analizy. **Marital Status**: Przyjmie wartości `Married` lub `Single`. **Gender**: Przyjmie wartości `Male` lub `Female`. **Home Owner**: Przyjmie wartości `Yes` lub `No`.
 
 ```{r}
 # Ustawienie poziomów dla zmiennych kategorycznych
@@ -47,11 +45,9 @@ str(dane)
 ```
 
 ## Analiza braków danych
-W tej sekcji analizujemy braki danych w zbiorze, wykorzystując wizualizacje i podsumowania.
-1. **Wizualizacja braków danych**: Funkcja `vis_miss()` z pakietu `naniar` pokazuje, które dane są brakujące w każdej kolumnie.
-2. **Podsumowanie braków**: Funkcja `miss_var_summary()` dostarcza liczbowego podsumowania brakujących wartości.
-3. **Klasteryzacja braków**: Użycie klasteryzacji, aby sprawdzić, czy braki w kolumnach są ze sobą powiązane.
-4. **Eksport wyników**: Wyniki są zapisane do zmiennej `brak_summary` oraz wyświetlane w konsoli i w zakładce Viewer.
+
+W tej sekcji analizujemy braki danych w zbiorze, wykorzystując wizualizacje i podsumowania. 1. **Wizualizacja braków danych**: Funkcja `vis_miss()` z pakietu `naniar` pokazuje, które dane są brakujące w każdej kolumnie. 2. **Podsumowanie braków**: Funkcja `miss_var_summary()` dostarcza liczbowego podsumowania brakujących wartości. 3. **Klasteryzacja braków**: Użycie klasteryzacji, aby sprawdzić, czy braki w kolumnach są ze sobą powiązane. 4. **Eksport wyników**: Wyniki są zapisane do zmiennej `brak_summary` oraz wyświetlane w konsoli i w zakładce Viewer.
+
 ```{r}
 # Wizualizacja braków danych
 vis_miss(dane)
@@ -65,14 +61,20 @@ View(brak_summary)  # Otwiera podsumowanie w zakładce Viewer w RStudio
 na_counts <- miss_var_summary(dane)
 print(na_counts)
 ```
+
 ## Obliczanie unikatowych wartości w każdej kolumnie
-Poniższy fragment kodu tworzy ramkę danych `unique_value`, która zawiera liczbę unikatowych wartości w każdej kolumnie ramki danych `dane`, gdzie zawarte są informacje na temat sklepu rowerowego. 
+
+Poniższy fragment kodu tworzy ramkę danych `unique_value`, która zawiera liczbę unikatowych wartości w każdej kolumnie ramki danych `dane`, gdzie zawarte są informacje na temat sklepu rowerowego.
+
 ```{r}
 unique_value <- data.frame(liczba_unikatowych_wartosci = sapply(dane, n_distinct))
 print(unique_value)
 ```
+
 ## Przekształcanie zmiennych kategorycznych
+
 W tej sekcji przekształcamy wybrane zmienne kategoryczne na typ `factor`. Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy, takich jak wizualizacja danych czy budowanie modeli statystycznych.
+
 ```{r}
 table_with_na <- function(column) {
   tab <- table(column, useNA = "ifany")  # Uwzględnienie braków danych
@@ -87,8 +89,11 @@ dane <- dane %>%
     `Home Owner` = as.factor(`Home Owner`)
   )
 ```
+
 ## Analiza zmiennych kategorycznych
+
 W tej sekcji obliczamy proporcje odpowiedzi dla każdej zmiennej kategorycznej w zbiorze danych.
+
 ```{r}
 proportions <- dane %>%
   select(where(is.factor)) %>%
@@ -98,8 +103,11 @@ proportions <- dane %>%
 
 print(n=29, proportions)
 ```
+
 ## Wizualizacja braków danych
+
 W tej sekcji wizualizujemy liczbę brakujących wartości w każdej kolumnie danych. Dzięki temu można łatwo zobaczyć, które kolumny wymagają dalszego przetworzenia.
+
 ```{r}
 ggplot(na_counts, aes(x = variable, y = n_miss)) +
   geom_bar(stat = "identity") +
@@ -107,13 +115,11 @@ ggplot(na_counts, aes(x = variable, y = n_miss)) +
   theme_minimal()
 
 ```
+
 ## Analiza braków w zmiennych kluczowych
-W tej sekcji koncentrujemy się na zmiennych kluczowych, które mają największy wpływ na dalszą analizę: 
-- **`Purchased Bike`**
-- **`Income`**
-- **`Age`**
-- **`Marital Status`**
-Najpierw obliczamy liczbę brakujących danych dla każdej z tych kolumn, a następnie wizualizujemy wyniki.
+
+W tej sekcji koncentrujemy się na zmiennych kluczowych, które mają największy wpływ na dalszą analizę: - **`Purchased Bike`** - **`Income`** - **`Age`** - **`Marital Status`** Najpierw obliczamy liczbę brakujących danych dla każdej z tych kolumn, a następnie wizualizujemy wyniki.
+
 ```{r}
 required_columns <- c("`Purchased Bike`", "Income", "Age", "`Marital Status`")
 missing_summary <- sapply(required_columns, function(col) sum(is.na(dane[[col]])))
@@ -128,8 +134,11 @@ ggplot(missing_summary_df, aes(x = Zmienna, y = Braki)) +
   labs(title = "Liczba braków w zmiennych kluczowych", x = "Zmienna", y = "Liczba braków") +
   theme_minimal()
 ```
+
 ## Konwersja wybranych kolumn na typ `factor`
+
 W tej sekcji dokonujemy konwersji wybranych kolumn w zbiorze danych na typ `factor`.
+
 ```{r}
 factor_cols <- c("Marital Status", "Gender", "Education", "Occupation", "Home Owner", "Commute Distance", "Region", "Purchased Bike")
 dane <- dane %>%
@@ -138,14 +147,15 @@ dane <- dane %>%
 typy_danych <- sapply(dane, class)
 print(typy_danych)
 ```
+
 ## Uzupełnianie braków w danych
 
-Braki danych zostały uzupełnione różnymi metodami w zależności od typu zmiennych:
-1. **Zmienne liczbowe**: Uzupełniane za pomocą średniej adaptacyjnej.
-2. **Zmienne kategoryczne**: Uzupełniane za pomocą dominującej wartości (moda) lub imputacji wielowymiarowej (metoda `mice`).
+Braki danych zostały uzupełnione różnymi metodami w zależności od typu zmiennych: 1. **Zmienne liczbowe**: Uzupełniane za pomocą średniej adaptacyjnej. 2. **Zmienne kategoryczne**: Uzupełniane za pomocą dominującej wartości (moda) lub imputacji wielowymiarowej (metoda `mice`).
 
 ### Zastępowanie braków w zmiennych liczbowych
+
 Dla zmiennych liczbowych zastosowano średnią adaptacyjną (z obcięciem 10%) w celu uzupełnienia braków danych. Średnia adaptacyjna jest mniej podatna na wartości odstające niż standardowa średnia.
+
 ```{r}
 dane <- dane %>%
   mutate(
@@ -155,8 +165,11 @@ dane <- dane %>%
     Cars = ifelse(is.na(Cars), mean(Cars, na.rm = TRUE, trim = 0.1), Cars)
   )
 ```
+
 ## Imputacja wielowymiarowa
+
 Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową. To zaawansowane podejście opiera się na przewidywaniu brakujących wartości na podstawie podobieństwa do istniejących danych.
+
 ```{r}
 imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
 dane <- complete(imputed_data)
@@ -169,7 +182,9 @@ print(colnames(dane))
 dane <- dane %>%
   mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
 ```
+
 ## Uzupełnianie braków w danych kategorycznych
+
 ```{r}
 # Imputacja wielowymiarowa dla zmiennych kategorycznych
 categorical_data <- dane %>% select(all_of(categorical_vars))
@@ -179,7 +194,9 @@ dane[categorical_vars] <- complete(imputed_data)
 colSums(is.na(dane[categorical_vars]))
 str(dane)
 ```
+
 ### Metoda drzewa decyzyjnego
+
 ```{r}
 # Funkcja do imputacji zmiennych kategorycznych za pomocą drzewa decyzyjnego
 impute_with_tree <- function(data, target_var) {
@@ -194,8 +211,11 @@ for (var in categorical_vars) {
   dane <- impute_with_tree(dane, var)
 }
 ```
+
 ## Wizualizacja danych kategorycznych
+
 Poniższe wykresy przedstawiają rozkłady danych dla wybranych zmiennych kategorycznych.
+
 ```{r}
 # `Marital Status`
 ggplot(dane, aes(x = `Marital Status`)) +
@@ -212,7 +232,89 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 ```
 
+## Statystyki opisowe zmiennych liczbowych
 
+Podstawowes tatystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości.
 
+```{r}
+dane %>%
+  summarise(across(where(is.numeric), list(
+    mean = \(x) mean(x, na.rm = TRUE),
+    median = \(x) median(x, na.rm = TRUE),
+    sd = \(x) sd(x, na.rm = TRUE)
+  )))
+```
 
+## Statystyki opisowe zmiennych kategorycznych
 
+Tabela częstości dla każdej zmiennej kategorycznej w zbiorze danych "dane".
+
+```{r}
+dane %>%
+  summarise(across(where(is.factor), ~ list(table(.))))
+```
+
+## Podsumowanie za pomocą summarytools
+
+```{r}
+dfSummary(dane) %>%
+print(method = "pander", file = "podsumowanie_opisowe.html")
+```
+
+## Wizualizacja zmiennych kategorycznych
+
+Wykresy słupkowe dla każdej zmiennej kategorycznej, pokazując ich rozkład.
+
+```{r}
+categorical_vars <- dane %>% select(where(is.factor)) %>% colnames()
+walk(categorical_vars, ~ {
+  ggplot(dane, aes_string(x = .x)) +
+    geom_bar(fill = "skyblue") +
+    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji") +
+    theme_minimal() +
+    ggsave(paste0(.x, "_barplot.png"))
+})
+```
+
+## Wizualizacja zmiennych liczbowych
+
+Histogramy dla każdej zmiennej liczbowej, wizualizując ich rozkład.
+
+```{r}
+numerical_vars <- dane %>% select(where(is.numeric)) %>% colnames()
+walk(numerical_vars, ~ {
+  ggplot(dane, aes_string(x = .x)) +
+    geom_histogram(bins = 30, fill = "blue", color = "white") +
+    labs(title = paste("Histogram zmiennej:", .x), x = .x, y = "Częstość") +
+    theme_minimal() +
+    ggsave(paste0(.x, "_histogram.png"))
+})
+```
+
+## Korelacja zmiennych liczbowych
+
+Macierz korelacji dla zmiennych liczbowych i wizualizacja jako mapa cieplna przy użyciu ggcorrplot.
+
+```{r}
+cor_matrix <- cor(dane %>% select(where(is.numeric)), use = "complete.obs")
+ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3,
+           title = "Mapa korelacji zmiennych liczbowych", 
+           colors = c("red", "white", "blue"))
+```
+
+## Relacje liczbowo-kategoryczne (wykres pudełkowy)
+
+Wykresy pudełkowe pokazujące rozkład wartości liczbowych w podziale na kategorie zmiennych kategorycznych
+
+```{r}
+for (cat_var in categorical_vars) {
+  for (num_var in numerical_vars) {
+    ggplot(dane, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
+      geom_boxplot() +
+      labs(title = paste("Rozkład", num_var, "względem", cat_var),
+           x = cat_var, y = num_var) +
+      theme_minimal() +
+      ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
+  }
+}
+```
