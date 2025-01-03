@@ -1,5 +1,9 @@
 # Instalacja i załadowanie wszystkich wymaganych pakietów
 install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor"))
+install.packages("rpart.plot")
+install.packages("caret")
+library(caret)
+library(rpart.plot)
 library(readr)
 library(naniar)
 library(dplyr)
@@ -240,5 +244,41 @@ for (cat_var in categorical_vars) {
       ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
   }
 }
+# Ustalanie losowości
+set.seed(123)  
+train_index <- sample(seq_len(nrow(dane)), size = 0.7 * nrow(dane))
+train_data <- dane[train_index, ]
+test_data <- dane[-train_index, ]
+#model
+log_model <- glm(`Purchased Bike` ~ ., data = train_data, family = binomial)
+summary(log_model)
+
+# Przewidywanie i obliczenie dokładności
+predictions <- predict(log_model, test_data, type = "response")
+predicted_class <- ifelse(predictions > 0.5, "Yes", "No")
+actual_class <- test_data$`Purchased Bike`
+
+# Obliczanie dokładności
+accuracy <- mean(predicted_class == actual_class)
+cat("Dokładność modelu:", accuracy, "\n")
+
+# Tworzenie macierzy pomyłek
+conf_matrix <- table(Predicted = predicted_class, Actual = actual_class)
+print(conf_matrix)
+
+# Obliczanie F1-score
+
+f1_score <- F_meas(as.factor(predicted_class), as.factor(actual_class))
+cat("F1-score:", f1_score, "\n")
+
+
+#drzewo decyzyjne dla purchased bike
+tree_model <- rpart(`Purchased Bike` ~ ., data = train_data, method = "class")
+rpart.plot(tree_model)
+
+# Przewidywanie na zbiorze testowym
+tree_predictions <- predict(tree_model, test_data, type = "class")
+tree_accuracy <- mean(tree_predictions == actual_class)
+cat("Dokładność drzewa decyzyjnego:", tree_accuracy, "\n")
 
 
