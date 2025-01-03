@@ -1,7 +1,5 @@
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor"))
-install.packages("rpart.plot")
-install.packages("caret")
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret"))
 library(caret)
 library(rpart.plot)
 library(readr)
@@ -123,7 +121,7 @@ dane <- dane %>%
 imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
 
 # Uzupełnienie braków
-dane <- complete(imputed_data)
+dane2 <- complete(imputed_data)
 plot(imputed_data)  # Wizualizacja konwergencji imputacji
 
 # Lista zmiennych kategorycznych bez backticków
@@ -281,4 +279,28 @@ tree_predictions <- predict(tree_model, test_data, type = "class")
 tree_accuracy <- mean(tree_predictions == actual_class)
 cat("Dokładność drzewa decyzyjnego:", tree_accuracy, "\n")
 
+# Analiza ANOVA dla dochodów w zależności od regionu
+anova_result <- aov(Income ~ Region, data = dane)
+summary(anova_result)
 
+# Test Kruskala-Wallisa dla nienormalnych danych
+kruskal.test(Income ~ Region, data = dane)
+# Wykres pudełkowy dla dochodów w różnych regionach
+ggplot(dane, aes(x = Region, y = Income, fill = Region)) +
+  geom_boxplot() +
+  labs(title = "Dochody w różnych regionach", x = "Region", y = "Dochód") +
+  theme_minimal()
+
+# Wykres słupkowy dla liczby zakupionych rowerów w zależności od regionu
+ggplot(dane, aes(x = Region, fill = `Purchased Bike`)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Zakupy rowerów w różnych regionach", x = "Region", y = "Liczba zakupów") +
+  theme_minimal()
+# Test Kruskala-Wallisa dla dochodów w zależności od dystansu dojazdu
+kruskal.test(Income ~ `Commute Distance`, data = dane)
+
+# Wizualizacja
+ggplot(dane, aes(x = `Commute Distance`, y = Income, fill = `Commute Distance`)) +
+  geom_boxplot() +
+  labs(title = "Dochody w zależności od dystansu dojazdu", x = "Dystans dojazdu", y = "Dochód") +
+  theme_minimal()
