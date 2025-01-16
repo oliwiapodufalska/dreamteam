@@ -1,5 +1,5 @@
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret"))
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
 library(caret)
 library(rpart.plot)
 library(readr)
@@ -14,6 +14,8 @@ library(readr)
 library(purrr)
 library(ggcorrplot)
 library(janitor)
+library(ggstatsplot)
+library(rlang)
 
 # Import danych
 dane <- read_csv("sklep_rowerowy.csv")
@@ -205,19 +207,23 @@ categorical_vars <- dane %>% select(where(is.factor)) %>% colnames()
 walk(categorical_vars, ~ {
   ggplot(dane, aes_string(x = .x)) +
     geom_bar(fill = "skyblue") +
-    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji") +
-    theme_minimal() +
+    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji")
     ggsave(paste0(.x, "_barplot.png"))
 })
 
 #wizualizacja zmiennych kiczbowych
 numerical_vars <- dane %>% select(where(is.numeric)) %>% colnames()
 walk(numerical_vars, ~ {
-  ggplot(dane, aes_string(x = .x)) +
-    geom_histogram(bins = 30, fill = "blue", color = "white") +
-    labs(title = paste("Histogram zmiennej:", .x), x = .x, y = "Częstość") +
-    theme_minimal() +
-    ggsave(paste0(.x, "_histogram.png"))
+  plot <- gghistostats(
+    data = dane,
+    x = !!sym(.x),
+    bins = 30,
+    title = paste("Histogram zmiennej:", .x),
+    xlab = .x,
+    ylab = "Częstość",
+    type = "parametric",
+  )
+  ggsave(paste0(.x, "_histogram.png"), plot = plot, width = 8, height = 6)
 })
 
 
@@ -234,12 +240,17 @@ ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3
 #relacje liczbowe-kategoryczne, wykres pudelkowy 
 for (cat_var in categorical_vars) {
   for (num_var in numerical_vars) {
-    ggplot(dane, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
-      geom_boxplot() +
-      labs(title = paste("Rozkład", num_var, "względem", cat_var),
-           x = cat_var, y = num_var) +
-      theme_minimal() +
-      ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
+    ggbetweenstats(
+      data = dane,
+      x = !!sym(cat_var),
+      y = !!sym(num_var),
+      pairwise.comparisons = TRUE,
+      title = paste("Rozkład", num_var, "względem", cat_var),
+      xlab = cat_var,
+      ylab = num_var,
+      plot.type = "box"
+    )
+    ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
   }
 }
 # Ustalanie losowości
@@ -283,24 +294,50 @@ cat("Dokładność drzewa decyzyjnego:", tree_accuracy, "\n")
 anova_result <- aov(Income ~ Region, data = dane)
 summary(anova_result)
 
+#Wizualizacja ANOVA
+ggbetweenstats(
+  data = dane,
+  x = Region,            
+  y = Income,            
+  type = "parametric",   
+  title = "Analiza ANOVA: Dochody w zależności od Regionu",
+  xlab = "Region",
+  ylab = "Dochód",
+)
+
 # Test Kruskala-Wallisa dla nienormalnych danych
 kruskal.test(Income ~ Region, data = dane)
 # Wykres pudełkowy dla dochodów w różnych regionach
-ggplot(dane, aes(x = Region, y = Income, fill = Region)) +
-  geom_boxplot() +
-  labs(title = "Dochody w różnych regionach", x = "Region", y = "Dochód") +
-  theme_minimal()
+ggbetweenstats(
+  data = dane,
+  x = Region,          
+  y = Income,          
+  type = "parametric", 
+  title = "Dochody w różnych regionach",
+  xlab = "Region",
+  ylab = "Dochód",
+)
 
 # Wykres słupkowy dla liczby zakupionych rowerów w zależności od regionu
-ggplot(dane, aes(x = Region, fill = `Purchased Bike`)) +
-  geom_bar(position = "dodge") +
-  labs(title = "Zakupy rowerów w różnych regionach", x = "Region", y = "Liczba zakupów") +
-  theme_minimal()
+ggbarstats(
+  data = dane,
+  x = Region,               
+  y = `Purchased Bike`,     
+  title = "Zakupy rowerów w różnych regionach",
+  xlab = "Decyzja o zakupie",
+  ylab = "Liczba zakupów",
+)
+
 # Test Kruskala-Wallisa dla dochodów w zależności od dystansu dojazdu
 kruskal.test(Income ~ `Commute Distance`, data = dane)
 
 # Wizualizacja
-ggplot(dane, aes(x = `Commute Distance`, y = Income, fill = `Commute Distance`)) +
-  geom_boxplot() +
-  labs(title = "Dochody w zależności od dystansu dojazdu", x = "Dystans dojazdu", y = "Dochód") +
-  theme_minimal()
+ggbetweenstats(
+  data = dane,
+  x = `Commute Distance`,  
+  y = Income,              
+  type = "parametric",     
+  title = "Dochody w zależności od dystansu dojazdu",
+  xlab = "Dystans dojazdu",
+  ylab = "Dochód",
+)
