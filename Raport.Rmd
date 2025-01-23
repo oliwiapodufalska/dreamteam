@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart"))
+#install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
 library(readr)
 library(naniar)
 library(dplyr)
@@ -16,7 +16,8 @@ library(tidyr)
 library(ggplot2)
 library(mice)
 library(rpart)
-
+library(ggstatsplot)
+library(rlang)
 ```
 
 Ten projekt analizuje dane sklepu rowerowego, aby: uzupełnić brakujące dane, przeprowadzić wizualizacje danych.
@@ -234,7 +235,7 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 ## Statystyki opisowe zmiennych liczbowych
 
-Podstawowes tatystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości.
+Podstawowes statystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości.
 
 ```{r}
 dane %>%
@@ -270,8 +271,7 @@ categorical_vars <- dane %>% select(where(is.factor)) %>% colnames()
 walk(categorical_vars, ~ {
   ggplot(dane, aes_string(x = .x)) +
     geom_bar(fill = "skyblue") +
-    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji") +
-    theme_minimal() +
+    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji")
     ggsave(paste0(.x, "_barplot.png"))
 })
 ```
@@ -283,11 +283,16 @@ Histogramy dla każdej zmiennej liczbowej, wizualizując ich rozkład.
 ```{r}
 numerical_vars <- dane %>% select(where(is.numeric)) %>% colnames()
 walk(numerical_vars, ~ {
-  ggplot(dane, aes_string(x = .x)) +
-    geom_histogram(bins = 30, fill = "blue", color = "white") +
-    labs(title = paste("Histogram zmiennej:", .x), x = .x, y = "Częstość") +
-    theme_minimal() +
-    ggsave(paste0(.x, "_histogram.png"))
+  plot <- gghistostats(
+    data = dane,
+    x = !!sym(.x),
+    bins = 30,
+    title = paste("Histogram zmiennej:", .x),
+    xlab = .x,
+    ylab = "Częstość",
+    type = "parametric",
+  )
+  ggsave(paste0(.x, "_histogram.png"), plot = plot, width = 8, height = 6)
 })
 ```
 
@@ -309,12 +314,17 @@ Wykresy pudełkowe pokazujące rozkład wartości liczbowych w podziale na kateg
 ```{r}
 for (cat_var in categorical_vars) {
   for (num_var in numerical_vars) {
-    ggplot(dane, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
-      geom_boxplot() +
-      labs(title = paste("Rozkład", num_var, "względem", cat_var),
-           x = cat_var, y = num_var) +
-      theme_minimal() +
-      ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
+    ggbetweenstats(
+      data = dane,
+      x = !!sym(cat_var),
+      y = !!sym(num_var),
+      pairwise.comparisons = TRUE,
+      title = paste("Rozkład", num_var, "względem", cat_var),
+      xlab = cat_var,
+      ylab = num_var,
+      plot.type = "box"
+    )
+    ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
   }
 }
 ```
@@ -359,19 +369,23 @@ cat("F1-score:", f1_score, "\n")
 
 ## Drzewo decyzyjne: Budowa i ocena modelu Drzewo decyzyjne zostało dopasowane do zbioru treningowego, a następnie ocenione na zbiorze testowym. Poniżej przedstawiono wizualizację drzewa oraz obliczenia dokładności.
 
+### Drzewo decyzyjne dla Purchased Bike
+
 ```{r}
-# Drzewo decyzyjne dla Purchased Bike
 tree_model <- rpart(`Purchased Bike` ~ ., data = train_data, method = "class")
 rpart.plot(tree_model)
+```
 
-# Przewidywanie na zbiorze testowym
+### Przewidywanie na zbiorze testowym
+
+```{r}
 tree_predictions <- predict(tree_model, test_data, type = "class")
 tree_accuracy <- mean(tree_predictions == actual_class)
 cat("Dokładność drzewa decyzyjnego:", tree_accuracy, "\n")
 
 ```
 
-## Wnioski
+# Wnioski
 
 Regresja logistyczna dostarcza bardziej szczegółowych statystyk, natomiast drzewo decyzyjne jest łatwiejsze do interpretacji wizualnej.
 
@@ -382,6 +396,15 @@ W tej sekcji analizujemy, czy dochody różnią się istotnie między regionami 
 ```{r}
 anova_result <- aov(Income ~ Region, data = dane)
 summary(anova_result)
+ggbetweenstats(
+  data = dane,
+  x = Region,            
+  y = Income,            
+  type = "parametric",   
+  title = "Analiza ANOVA: Dochody w zależności od Regionu",
+  xlab = "Region",
+  ylab = "Dochód",
+)
 ```
 
 ## Test Kruskala-Wallisa dla nienormalnych danych
@@ -397,10 +420,16 @@ kruskal.test(Income ~ Region, data = dane)
 Wizualizacja rozkładu dochodów w różnych regionach.
 
 ```{r}
-ggplot(dane, aes(x = Region, y = Income, fill = Region)) +
-  geom_boxplot() +
-  labs(title = "Dochody w różnych regionach", x = "Region", y = "Dochód") +
-  theme_minimal()
+# Wykres pudełkowy dla dochodów w różnych regionach
+ggbetweenstats(
+  data = dane,
+  x = Region,          
+  y = Income,          
+  type = "parametric", 
+  title = "Dochody w różnych regionach",
+  xlab = "Region",
+  ylab = "Dochód",
+)
 ```
 
 ## Wykres słupkowy dla liczby zakupionych rowerów w zależności od regionu
@@ -408,10 +437,14 @@ ggplot(dane, aes(x = Region, y = Income, fill = Region)) +
 Analiza liczby zakupionych rowerów w różnych regionach.
 
 ```{r}
-ggplot(dane, aes(x = Region, fill = `Purchased Bike`)) +
-  geom_bar(position = "dodge") +
-  labs(title = "Zakupy rowerów w różnych regionach", x = "Region", y = "Liczba zakupów") +
-  theme_minimal()
+ggbarstats(
+  data = dane,
+  x = Region,               
+  y = `Purchased Bike`,     
+  title = "Zakupy rowerów w różnych regionach",
+  xlab = "Decyzja o zakupie",
+  ylab = "Liczba zakupów",
+)
 ```
 
 ## Test Kruskala-Wallisa dla dochodów w zależności od dystansu dojazdu
@@ -427,8 +460,13 @@ kruskal.test(Income ~ `Commute Distance`, data = dane)
 Wykres pudełkowy przedstawiający zależność między dochodami a dystansem dojazdu.
 
 ```{r}
-ggplot(dane, aes(x = `Commute Distance`, y = Income, fill = `Commute Distance`)) +
-  geom_boxplot() +
-  labs(title = "Dochody w zależności od dystansu dojazdu", x = "Dystans dojazdu", y = "Dochód") +
-  theme_minimal()
+ggbetweenstats(
+  data = dane,
+  x = `Commute Distance`,  
+  y = Income,              
+  type = "parametric",     
+  title = "Dochody w zależności od dystansu dojazdu",
+  xlab = "Dystans dojazdu",
+  ylab = "Dochód",
+)
 ```
