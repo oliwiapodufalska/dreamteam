@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 # Instalacja i załadowanie wszystkich wymaganych pakietów
 install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
+library(caret)
+library(rpart.plot)
 library(readr)
 library(naniar)
 library(dplyr)
@@ -16,6 +18,11 @@ library(tidyr)
 library(ggplot2)
 library(mice)
 library(rpart)
+library(summarytools)
+library(readr)
+library(purrr)
+library(ggcorrplot)
+library(janitor)
 library(ggstatsplot)
 library(rlang)
 ```
@@ -267,13 +274,15 @@ print(method = "pander", file = "podsumowanie_opisowe.html")
 Wykresy słupkowe dla każdej zmiennej kategorycznej, pokazując ich rozkład.
 
 ```{r}
-categorical_vars <- dane %>% select(where(is.factor)) %>% colnames()
-walk(categorical_vars, ~ {
-  ggplot(dane, aes_string(x = .x)) +
-    geom_bar(fill = "skyblue") +
-    labs(title = paste("Rozkład zmiennej:", .x), x = .x, y = "Liczba obserwacji")
-    ggsave(paste0(.x, "_barplot.png"))
-})
+dane %>%
+select(where(is.factor)) %>%
+pivot_longer(everything()) %>%
+ggplot(aes(x = value)) +
+geom_bar(fill = "steelblue") +
+facet_wrap(~ name, scales = "free") +
+labs(title = "Rozkład zmiennych kategorycznych", x = "Kategorie", y = "Liczba obserwacji") +
+theme_minimal()  #wizualizacja zmiennych kategorycznych
+
 ```
 
 ## Wizualizacja zmiennych liczbowych
@@ -312,9 +321,14 @@ ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3
 Wykresy pudełkowe pokazujące rozkład wartości liczbowych w podziale na kategorie zmiennych kategorycznych
 
 ```{r}
+# Definiowanie zmiennych
+categorical_vars <- c("Purchased Bike", "Marital Status")
+numerical_vars <- c("Income", "Age")
+
+# Pętla po zmiennych kategorycznych i numerycznych
 for (cat_var in categorical_vars) {
   for (num_var in numerical_vars) {
-    ggbetweenstats(
+    plot <- ggbetweenstats(
       data = dane,
       x = !!sym(cat_var),
       y = !!sym(num_var),
@@ -324,7 +338,9 @@ for (cat_var in categorical_vars) {
       ylab = num_var,
       plot.type = "box"
     )
-    ggsave(paste0(cat_var, "vs", num_var, "_boxplot.png"))
+    
+    # Drukowanie wykresu w konsoli
+    print(plot)
   }
 }
 ```
@@ -415,12 +431,12 @@ Jeśli dane nie spełniają założeń normalności, stosujemy test Kruskala-Wal
 kruskal.test(Income ~ Region, data = dane)
 ```
 
-## Wykres Pudełkowy dla dochodów w różnych regionach
+## Wykres dla dochodów w różnych regionach
 
 Wizualizacja rozkładu dochodów w różnych regionach.
 
 ```{r}
-# Wykres pudełkowy dla dochodów w różnych regionach
+# Wykres dla dochodów w różnych regionach
 ggbetweenstats(
   data = dane,
   x = Region,          
@@ -457,7 +473,7 @@ kruskal.test(Income ~ `Commute Distance`, data = dane)
 
 ## Wizualizacja dochodów w zależności od dystansu dojazdu
 
-Wykres pudełkowy przedstawiający zależność między dochodami a dystansem dojazdu.
+Wykres przedstawiający zależność między dochodami a dystansem dojazdu.
 
 ```{r}
 ggbetweenstats(
