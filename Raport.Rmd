@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-#install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
+install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
 library(readr)
 library(naniar)
 library(dplyr)
@@ -173,7 +173,7 @@ Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową. To zaawa
 
 ```{r}
 imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
-dane <- complete(imputed_data)
+dane2 <- complete(imputed_data)
 plot(imputed_data)  # Wizualizacja konwergencji imputacji
 # Lista zmiennych kategorycznych bez backticków
 categorical_vars <- c("Marital Status", "Gender", "Home Owner")
