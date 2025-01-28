@@ -290,7 +290,13 @@ theme_minimal()  #wizualizacja zmiennych kategorycznych
 Histogramy dla każdej zmiennej liczbowej, wizualizując ich rozkład.
 
 ```{r}
-numerical_vars <- dane %>% select(where(is.numeric)) %>% colnames()
+# Wybór zmiennych liczbowych z wykluczeniem ID
+numerical_vars <- dane %>%
+  select(where(is.numeric)) %>%
+  select(-ID) %>%  # Wykluczenie ID
+  colnames()
+
+# Generowanie histogramów dla każdej zmiennej liczbowej
 walk(numerical_vars, ~ {
   plot <- gghistostats(
     data = dane,
@@ -299,9 +305,9 @@ walk(numerical_vars, ~ {
     title = paste("Histogram zmiennej:", .x),
     xlab = .x,
     ylab = "Częstość",
-    type = "parametric",
+    type = "parametric"
   )
-  ggsave(paste0(.x, "_histogram.png"), plot = plot, width = 8, height = 6)
+  print(plot)
 })
 ```
 
