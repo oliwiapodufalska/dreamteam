@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Instalacja i załadowanie wszystkich wymaganych pakietów
-install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
+#install.packages(c("readr", "naniar", "dplyr", "tidyr", "ggplot2", "mice", "rpart","summarytools","readr", "purrr", "ggcorrplot", "janitor", "rpart.plot", "caret", "ggstatsplot", "rlang"))
 library(caret)
 library(rpart.plot)
 library(readr)
@@ -179,16 +179,28 @@ dane <- dane %>%
 Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową. To zaawansowane podejście opiera się na przewidywaniu brakujących wartości na podstawie podobieństwa do istniejących danych.
 
 ```{r}
-imputed_data <- mice(dane, m = 5, method = 'pmm', seed = 123)
+# Tworzenie kopii danych z poprawionymi nazwami kolumn (dla mice)
+dane_mice <- dane
+colnames(dane_mice) <- make.names(colnames(dane_mice))  # Zamiana spacji na kropki
+
+# Imputacja wielowymiarowa dla zmiennych liczbowych (używając skorygowanych nazw)
+imputed_data <- mice(dane_mice, m = 5, method = 'pmm', seed = 123)
+
+# Konwersja z powrotem do pełnych danych
 dane2 <- complete(imputed_data)
-plot(imputed_data)  # Wizualizacja konwergencji imputacji
-# Lista zmiennych kategorycznych bez backticków
-categorical_vars <- c("Marital Status", "Gender", "Home Owner")
-# Sprawdzenie nazw kolumn w danych
-print(colnames(dane))
-# Zastępowanie braków dominantą
-dane <- dane %>%
-  mutate(across(all_of(categorical_vars), ~ ifelse(is.na(.), names(which.max(table(., useNA = "no"))), .)))
+
+# Wizualizacja imputacji
+plot(imputed_data)  # Powinno teraz działać bez błędu
+
+# Przywrócenie oryginalnych nazw kolumn
+colnames(dane2) <- colnames(dane)
+
+# Sprawdzenie czy wszystko działa
+print(head(dane2))
+summary(dane2)  # Podsumowanie danych po imputacji
+colSums(is.na(dane2))  # Czy nadal są braki?
+
+
 ```
 
 ## Uzupełnianie braków w danych kategorycznych
