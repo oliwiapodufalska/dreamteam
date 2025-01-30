@@ -36,6 +36,9 @@ library(readr)
 dane <- read_csv("sklep_rowerowy.csv")
 head(dane)
 str(dane)
+# Definiowanie zmiennych
+categorical_vars <- c("Purchased Bike", "Marital Status")
+numerical_vars <- c("Income", "Age")
 ```
 
 ## Ustawienie poziomów dla zmiennych kategorycznych
@@ -345,9 +348,7 @@ ggcorrplot(cor_matrix, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3
 Wykresy pudełkowe pokazujące rozkład wartości liczbowych w podziale na kategorie zmiennych kategorycznych
 
 ```{r}
-# Definiowanie zmiennych
-categorical_vars <- c("Purchased Bike", "Marital Status")
-numerical_vars <- c("Income", "Age")
+
 
 # Pętla po zmiennych kategorycznych i numerycznych
 for (cat_var in categorical_vars) {
