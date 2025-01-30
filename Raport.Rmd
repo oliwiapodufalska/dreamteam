@@ -3,6 +3,9 @@ title: "Analiza danych - sklep rowerowy"
 author: "Oliwia Podufalska, Miłosz Stańko, Marek Psyta"
 date: "`r Sys.Date()`"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r setup, include=FALSE}
@@ -43,7 +46,10 @@ numerical_vars <- c("Income", "Age")
 
 ## Ustawienie poziomów dla zmiennych kategorycznych
 
-W tej sekcji ustawiamy poziomy dla zmiennych kategorycznych, aby były bardziej czytelne i zgodne z oczekiwaniami analizy. **Marital Status**: Przyjmie wartości `Married` lub `Single`. **Gender**: Przyjmie wartości `Male` lub `Female`. **Home Owner**: Przyjmie wartości `Yes` lub `No`.
+W tej sekcji ustawiamy poziomy dla zmiennych kategorycznych, aby były bardziej czytelne i zgodne z oczekiwaniami analizy.
+**Marital Status**: Przyjmie wartości `Married` lub `Single`.
+**Gender**: Przyjmie wartości `Male` lub `Female`.
+**Home Owner**: Przyjmie wartości `Yes` lub `No`.
 
 ```{r}
 # Ustawienie poziomów dla zmiennych kategorycznych
@@ -57,7 +63,15 @@ str(dane)
 
 ## Analiza braków danych
 
-W tej sekcji analizujemy braki danych w zbiorze, wykorzystując wizualizacje i podsumowania. 1. **Wizualizacja braków danych**: Funkcja `vis_miss()` z pakietu `naniar` pokazuje, które dane są brakujące w każdej kolumnie. 2. **Podsumowanie braków**: Funkcja `miss_var_summary()` dostarcza liczbowego podsumowania brakujących wartości. 3. **Klasteryzacja braków**: Użycie klasteryzacji, aby sprawdzić, czy braki w kolumnach są ze sobą powiązane. 4. **Eksport wyników**: Wyniki są zapisane do zmiennej `brak_summary` oraz wyświetlane w konsoli i w zakładce Viewer.
+W tej sekcji analizujemy braki danych w zbiorze, wykorzystując wizualizacje i podsumowania.
+1.
+**Wizualizacja braków danych**: Funkcja `vis_miss()` z pakietu `naniar` pokazuje, które dane są brakujące w każdej kolumnie.
+2.
+**Podsumowanie braków**: Funkcja `miss_var_summary()` dostarcza liczbowego podsumowania brakujących wartości.
+3.
+**Klasteryzacja braków**: Użycie klasteryzacji, aby sprawdzić, czy braki w kolumnach są ze sobą powiązane.
+4.
+**Eksport wyników**: Wyniki są zapisane do zmiennej `brak_summary` oraz wyświetlane w konsoli i w zakładce Viewer.
 
 ```{r}
 # Wizualizacja braków danych
@@ -84,7 +98,8 @@ print(unique_value)
 
 ## Przekształcanie zmiennych kategorycznych
 
-W tej sekcji przekształcamy wybrane zmienne kategoryczne na typ `factor`. Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy, takich jak wizualizacja danych czy budowanie modeli statystycznych.
+W tej sekcji przekształcamy wybrane zmienne kategoryczne na typ `factor`.
+Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy, takich jak wizualizacja danych czy budowanie modeli statystycznych.
 
 ```{r}
 table_with_na <- function(column) {
@@ -117,7 +132,8 @@ print(n=29, proportions)
 
 ## Wizualizacja braków danych
 
-W tej sekcji wizualizujemy liczbę brakujących wartości w każdej kolumnie danych. Dzięki temu można łatwo zobaczyć, które kolumny wymagają dalszego przetworzenia.
+W tej sekcji wizualizujemy liczbę brakujących wartości w każdej kolumnie danych.
+Dzięki temu można łatwo zobaczyć, które kolumny wymagają dalszego przetworzenia.
 
 ```{r}
 ggplot(na_counts, aes(x = variable, y = n_miss)) +
@@ -161,11 +177,15 @@ print(typy_danych)
 
 ## Uzupełnianie braków w danych
 
-Braki danych zostały uzupełnione różnymi metodami w zależności od typu zmiennych: 1. **Zmienne liczbowe**: Uzupełniane za pomocą średniej adaptacyjnej. 2. **Zmienne kategoryczne**: Uzupełniane za pomocą dominującej wartości (moda) lub imputacji wielowymiarowej (metoda `mice`).
+Braki danych zostały uzupełnione różnymi metodami w zależności od typu zmiennych: 1.
+**Zmienne liczbowe**: Uzupełniane za pomocą średniej adaptacyjnej.
+2.
+**Zmienne kategoryczne**: Uzupełniane za pomocą dominującej wartości (moda) lub imputacji wielowymiarowej (metoda `mice`).
 
 ### Zastępowanie braków w zmiennych liczbowych
 
-Dla zmiennych liczbowych zastosowano średnią adaptacyjną (z obcięciem 10%) w celu uzupełnienia braków danych. Średnia adaptacyjna jest mniej podatna na wartości odstające niż standardowa średnia.
+Dla zmiennych liczbowych zastosowano średnią adaptacyjną (z obcięciem 10%) w celu uzupełnienia braków danych.
+Średnia adaptacyjna jest mniej podatna na wartości odstające niż standardowa średnia.
 
 ```{r}
 dane <- dane %>%
@@ -179,7 +199,8 @@ dane <- dane %>%
 
 ## Imputacja wielowymiarowa
 
-Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową. To zaawansowane podejście opiera się na przewidywaniu brakujących wartości na podstawie podobieństwa do istniejących danych.
+Dla zmiennych kategorycznych przeprowadzono imputację wielowymiarową.
+To zaawansowane podejście opiera się na przewidywaniu brakujących wartości na podstawie podobieństwa do istniejących danych.
 
 ```{r}
 # Tworzenie kopii danych z poprawionymi nazwami kolumn (dla mice)
@@ -257,7 +278,8 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 ## Statystyki opisowe zmiennych liczbowych
 
-Podstawowes statystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości. Dla danych uznanych przez nas za najważniejsze, to jest dla **`Income`** oraz **`Age`** są one następujące:
+Podstawowes statystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości.
+Dla danych uznanych przez nas za najważniejsze, to jest dla **`Income`** oraz **`Age`** są one następujące:
 
 Dla **`Income`** średnia to 56252.09, mediana 60000, zaś odchylenie standardowe to znaczące 30975.03.
 
@@ -274,7 +296,8 @@ dane %>%
 
 ## Statystyki opisowe zmiennych kategorycznych
 
-Tabela częstości dla każdej zmiennej kategorycznej w zbiorze danych "dane". Pośród nich najważniejsze dla tego raportu są: **`Purchased Bike`** oraz **`Marital Status`**
+Tabela częstości dla każdej zmiennej kategorycznej w zbiorze danych "dane".
+Pośród nich najważniejsze dla tego raportu są: **`Purchased Bike`** oraz **`Marital Status`**
 
 ```{r}
 dane %>%
@@ -372,7 +395,8 @@ for (cat_var in categorical_vars) {
 
 ## Model regresji logistycznej
 
-W tej sekcji przeprowadzono proces budowy modelu regresji logistycznej, który przewiduje zmienną Purchased Bike (czy dana osoba zakupiła rower). Model wykorzystuje wszystkie dostępne zmienne jako predyktory.
+W tej sekcji przeprowadzono proces budowy modelu regresji logistycznej, który przewiduje zmienną Purchased Bike (czy dana osoba zakupiła rower).
+Model wykorzystuje wszystkie dostępne zmienne jako predyktory.
 
 ```{r}
 #podział danych na zbiory treningowy i testowy
@@ -430,7 +454,6 @@ cat("Dokładność drzewa decyzyjnego:", tree_accuracy, "\n")
 
 Regresja logistyczna dostarcza bardziej szczegółowych statystyk, natomiast drzewo decyzyjne jest łatwiejsze do interpretacji wizualnej.
 
-
 ### Test chi-kwadrat dla Purchased bike
 
 ```{r}
@@ -450,15 +473,18 @@ print(chi_region)
 
 ## Czy gender ma wpływ na zakup roweru?
 
-P-value = 0.7836 (dużo większe niż 0.05) Brak istotnej zależności między płcią a zakupem roweru. Wniosek: Płeć nie wpływa znacząco na decyzję o zakupie roweru.
+P-value = 0.7836 (dużo większe niż 0.05) Brak istotnej zależności między płcią a zakupem roweru.
+Wniosek: Płeć nie wpływa znacząco na decyzję o zakupie roweru.
 
 ## Czy stan cywilny ma wpływ na zakup roweru?
 
-P-value = 0.0004242 (znacznie mniejsze niż 0.05) Istotna zależność – stan cywilny wpływa na zakup roweru. Wniosek: Osoby zamężne/żonate kupują rowery w inny sposób niż osoby samotne.
+P-value = 0.0004242 (znacznie mniejsze niż 0.05) Istotna zależność – stan cywilny wpływa na zakup roweru.
+Wniosek: Osoby zamężne/żonate kupują rowery w inny sposób niż osoby samotne.
 
 ## Czy region ma wpływ na zakup roweru?
 
-P-value = 0.001032 (mniejsze niż 0.05) Istotna zależność – region wpływa na zakup roweru. Wniosek: Mieszkańcy różnych regionów różnią się pod względem liczby zakupionych rowerów. 
+P-value = 0.001032 (mniejsze niż 0.05) Istotna zależność – region wpływa na zakup roweru.
+Wniosek: Mieszkańcy różnych regionów różnią się pod względem liczby zakupionych rowerów.
 ### Która grupa częściej kupuje rowery?
 ### Zakup roweru a stan cywilny
 
@@ -475,9 +501,12 @@ ggplot(dane, aes(x = `Marital Status`, fill = `Purchased Bike`)) +
 
 ### Wniosek: Osoby samotne częściej kupują rowery!
 
-W grupie "Single" więcej osób kupiło rower (250) niż nie kupiło (211). W grupie "Married" mniej osób kupiło rower (231) niż nie kupiło (308). Test chi-kwadrat pokazał, że ta różnica jest istotna statystycznie (p = 0.00042).
+W grupie "Single" więcej osób kupiło rower (250) niż nie kupiło (211).
+W grupie "Married" mniej osób kupiło rower (231) niż nie kupiło (308).
+Test chi-kwadrat pokazał, że ta różnica jest istotna statystycznie (p = 0.00042).
 
 ### Zakup roweru a region
+
 ```{r}
 table(dane$`Purchased Bike`, dane$Region)
 #wizualizacja 
@@ -488,6 +517,7 @@ ggplot(dane, aes(x = Region, fill = `Purchased Bike`)) +
 
 
 ```
+
 ### Wnioski
 
 W Europie: 152 osób nie kupiło roweru, 148 kupiło.
@@ -497,6 +527,7 @@ Najwięcej rowerów kupują osoby w rejonie Pacyfiku, a najmniej w Ameryce Pół
 W rejonie Pacyfiku sytuacja jest odwrotna – więcej osób kupiło rower niż nie kupiło.
 
 ### Wybór testu
+
 ```{r}
 # Sprawdzamy normalność wieku
 shapiro.test(dane$Age)
@@ -517,3 +548,39 @@ ggbetweenstats(
 )
 ```
 
+# Podsumowanie
+
+W całym raporcie przeprowadziliśmy kolejne etapy analizy danych, obejmujące data wrangling, wizualizację danych, analizę opisową oraz wnioskowanie statystyczne.
+
+### Data wrangling
+
+Na początku dokonaliśmy wstępnej analizy danych, w której zidentyfikowaliśmy braki danych oraz sprawdziliśmy strukturę zbioru.
+Następnie oczyszczono dane, przekształcono zmienne kategoryczne na format odpowiedni do analizy oraz uzupełniono brakujące wartości.
+Wartości liczbowe zostały uzupełnione metodą średniej adaptacyjnej, a zmienne kategoryczne poprzez imputację wielowymiarową (MICE) oraz drzewa decyzyjne.
+
+### Wizualizacja danych
+
+Aby lepiej zrozumieć rozkłady zmiennych i ich zależności, przygotowaliśmy wykresy słupkowe, histogramy, wykresy pudełkowe oraz mapę korelacji.
+
+Wizualizacje te pozwoliły na zauważenie potencjalnych zależności między zmiennymi, w tym między zakupem roweru a zmiennymi demograficznymi oraz finansowymi klientów.
+
+### Analiza opisowa
+
+Przeprowadziliśmy szczegółową analizę statystyk opisowych, obejmującą średnią, medianę, odchylenie standardowe dla zmiennych liczbowych oraz częstość występowania wartości dla zmiennych kategorycznych.
+
+Dodatkowo wykonaliśmy analizę korelacji, aby sprawdzić, które zmienne są ze sobą powiązane.
+
+### Wnioskowanie statystyczne
+
+Aby zbadać czynniki wpływające na zakup roweru, przeprowadziliśmy testy statystyczne: Testy chi-kwadrat dla sprawdzenia zależności między zakupem roweru a zmiennymi kategorycznymi (m.in. płcią, stanem cywilnym, regionem).
+
+Wykazały one, że stan cywilny i region są istotnie związane z decyzją o zakupie roweru, natomiast płeć nie ma istotnego wpływu.
+Test Kruskala-Wallisa do analizy wpływu wieku na zakup roweru – wyniki wykazały, że osoby młodsze częściej kupują rower.
+
+### Wnioski końcowe
+
+Z przeprowadzonej analizy wynika, że zakup roweru zależy istotnie od wieku, stanu cywilnego i regionu zamieszkania, natomiast płeć klienta nie ma znaczącego wpływu na decyzję o zakupie.
+
+Wnioskowanie statystyczne oraz modelowanie predykcyjne dostarczyły cennych informacji, które mogą być wykorzystane do optymalizacji strategii sprzedażowej sklepu rowerowego.
+
+Podsumowując, raport pozwolił na identyfikację kluczowych czynników wpływających na decyzję zakupową klientów oraz dostarczył istotnych wskazówek dla biznesu w zakresie targetowania oferty i strategii marketingowej.
