@@ -242,7 +242,11 @@ ggplot(dane, aes(x = `Home Owner`)) +
 
 ## Statystyki opisowe zmiennych liczbowych
 
-Podstawowes statystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości.
+Podstawowes statystyki opisowe (średnia, mediana, odchylenie standardowe) dla każdej zmiennej liczbowej w zbiorze danych "dane", pomijając brakujące wartości. Dla danych uznanych przez nas za najważniejsze, to jest dla **`Income`** oraz **`Age`** są one następujące:
+
+Dla **`Income`** średnia to 56252.09, mediana 60000, zaś odchylenie standardowe to znaczące 30975.03.
+
+Natiomiast dla **`Age`** średnia to 44.17587, mediana 43, a odchylenie standardowe to mniej ekstremalne 11.31659.
 
 ```{r}
 dane %>%
@@ -255,7 +259,7 @@ dane %>%
 
 ## Statystyki opisowe zmiennych kategorycznych
 
-Tabela częstości dla każdej zmiennej kategorycznej w zbiorze danych "dane".
+Tabela częstości dla każdej zmiennej kategorycznej w zbiorze danych "dane". Pośród nich najważniejsze dla tego raportu są: **`Purchased Bike`** oraz **`Marital Status`**
 
 ```{r}
 dane %>%
@@ -263,6 +267,8 @@ dane %>%
 ```
 
 ## Podsumowanie za pomocą summarytools
+
+Jak widocznym jest w wygenerowanym pliku, dokonano 519 pozytywnych decyzji o zakupie roweru i 481 negatywnych oraz 539 spośród badanych jest w związku małżeńskim, zaś 461 nie jest.
 
 ```{r}
 dfSummary(dane) %>%
