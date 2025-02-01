@@ -99,7 +99,7 @@ print(unique_value)
 ## Przekształcanie zmiennych kategorycznych
 
 W tej sekcji przekształcamy wybrane zmienne kategoryczne na typ `factor`.
-Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy, takich jak wizualizacja danych czy budowanie modeli statystycznych.
+Dzięki temu możliwe jest prawidłowe wykorzystanie tych zmiennych w późniejszych etapach analizy.
 
 ```{r}
 table_with_na <- function(column) {
@@ -214,7 +214,7 @@ imputed_data <- mice(dane_mice, m = 5, method = 'pmm', seed = 123)
 dane2 <- complete(imputed_data)
 
 # Wizualizacja imputacji
-plot(imputed_data)  # Powinno teraz działać bez błędu
+plot(imputed_data)
 
 # Przywrócenie oryginalnych nazw kolumn
 colnames(dane2) <- colnames(dane)
@@ -222,7 +222,7 @@ colnames(dane2) <- colnames(dane)
 # Sprawdzenie czy wszystko działa
 print(head(dane2))
 summary(dane2)  # Podsumowanie danych po imputacji
-colSums(is.na(dane2))  # Czy nadal są braki?
+colSums(is.na(dane2))  
 
 
 ```
@@ -478,12 +478,12 @@ Wniosek: Płeć nie wpływa znacząco na decyzję o zakupie roweru.
 
 ## Czy stan cywilny ma wpływ na zakup roweru?
 
-P-value = 0.0004242 (znacznie mniejsze niż 0.05) Istotna zależność – stan cywilny wpływa na zakup roweru.
+P-value = 0.0004242 (znacznie mniejsze niż 0.05) Istotna zależność -- stan cywilny wpływa na zakup roweru.
 Wniosek: Osoby zamężne/żonate kupują rowery w inny sposób niż osoby samotne.
 
 ## Czy region ma wpływ na zakup roweru?
 
-P-value = 0.001032 (mniejsze niż 0.05) Istotna zależność – region wpływa na zakup roweru.
+P-value = 0.001032 (mniejsze niż 0.05) Istotna zależność -- region wpływa na zakup roweru.
 Wniosek: Mieszkańcy różnych regionów różnią się pod względem liczby zakupionych rowerów.
 ### Która grupa częściej kupuje rowery?
 ### Zakup roweru a stan cywilny
@@ -524,7 +524,7 @@ W Europie: 152 osób nie kupiło roweru, 148 kupiło.
 W Ameryce Północnej: 288 osób nie kupiło roweru, 220 kupiło.
 W rejonie Pacyfiku: 79 osób nie kupiło roweru, 113 kupiło.
 Najwięcej rowerów kupują osoby w rejonie Pacyfiku, a najmniej w Ameryce Północnej.W Europie liczba kupujących i niekupujących jest prawie równa.W Ameryce Północnej więcej osób nie kupiło roweru niż kupiło.
-W rejonie Pacyfiku sytuacja jest odwrotna – więcej osób kupiło rower niż nie kupiło.
+W rejonie Pacyfiku sytuacja jest odwrotna -- więcej osób kupiło rower niż nie kupiło.
 
 ### Wybór testu
 
@@ -575,7 +575,7 @@ Dodatkowo wykonaliśmy analizę korelacji, aby sprawdzić, które zmienne są ze
 Aby zbadać czynniki wpływające na zakup roweru, przeprowadziliśmy testy statystyczne: Testy chi-kwadrat dla sprawdzenia zależności między zakupem roweru a zmiennymi kategorycznymi (m.in. płcią, stanem cywilnym, regionem).
 
 Wykazały one, że stan cywilny i region są istotnie związane z decyzją o zakupie roweru, natomiast płeć nie ma istotnego wpływu.
-Test Kruskala-Wallisa do analizy wpływu wieku na zakup roweru – wyniki wykazały, że osoby młodsze częściej kupują rower.
+Test Kruskala-Wallisa do analizy wpływu wieku na zakup roweru -- wyniki wykazały, że osoby młodsze częściej kupują rower.
 
 ### Wnioski końcowe
 
