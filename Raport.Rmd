@@ -417,13 +417,16 @@ summary(log_model)
 # Przewidywanie i obliczenie dokładności
 predictions <- predict(log_model, test_data, type = "response")
 predicted_class <- ifelse(predictions > 0.5, "Yes", "No")
-actual_class <- test_data$`Purchased Bike`
+actual_class <- test_data$`Purchased.Bike`
 
 # Obliczanie dokładności
 accuracy <- mean(predicted_class == actual_class)
 cat("Dokładność modelu:", accuracy, "\n")
 
 # Tworzenie macierzy pomyłek
+length(predicted_class)
+length(actual_class)
+colnames(test_data)
 conf_matrix <- table(Predicted = predicted_class, Actual = actual_class)
 print(conf_matrix)
 
@@ -438,7 +441,7 @@ cat("F1-score:", f1_score, "\n")
 ### Drzewo decyzyjne dla Purchased Bike
 
 ```{r}
-tree_model <- rpart(`Purchased Bike` ~ ., data = train_data, method = "class")
+tree_model <- rpart(`Purchased.Bike` ~ ., data = train_data, method = "class")
 rpart.plot(tree_model)
 ```
 
@@ -459,15 +462,15 @@ Regresja logistyczna dostarcza bardziej szczegółowych statystyk, natomiast drz
 
 ```{r}
 # Test chi-kwadrat dla płci a zakup roweru
-chi_gender <- chisq.test(table(dane$`Purchased Bike`, dane$Gender))
+chi_gender <- chisq.test(table(dane$`Purchased.Bike`, dane$Gender))
 print(chi_gender)
 
 # Test chi-kwadrat dla stanu cywilnego a zakup roweru
-chi_marital <- chisq.test(table(dane$`Purchased Bike`, dane$`Marital Status`))
+chi_marital <- chisq.test(table(dane$`Purchased.Bike`, dane$`Marital.Status`))
 print(chi_marital)
 
 # Test chi-kwadrat dla regionu a zakup roweru
-chi_region <- chisq.test(table(dane$`Purchased Bike`, dane$Region))
+chi_region <- chisq.test(table(dane$`Purchased.Bike`, dane$Region))
 print(chi_region)
 
 ```
@@ -492,7 +495,7 @@ Wniosek: Mieszkańcy różnych regionów różnią się pod względem liczby zak
 ```{r}
 table(dane$`Purchased Bike`, dane$`Marital Status`)
 #wizualizacja 
-ggplot(dane, aes(x = `Marital Status`, fill = `Purchased Bike`)) +
+ggplot(dane, aes(x = `Marital.Status`, fill = `Purchased.Bike`)) +
   geom_bar(position = "dodge") +
   labs(title = "Zakup roweru a stan cywilny", x = "Stan cywilny", y = "Liczba osób") +
   theme_minimal()
@@ -509,9 +512,9 @@ Test chi-kwadrat pokazał, że ta różnica jest istotna statystycznie (p = 0.00
 ### Zakup roweru a region
 
 ```{r}
-table(dane$`Purchased Bike`, dane$Region)
+table(dane$`Purchased.Bike`, dane$Region)
 #wizualizacja 
-ggplot(dane, aes(x = Region, fill = `Purchased Bike`)) +
+ggplot(dane, aes(x = Region, fill = `Purchased.Bike`)) +
   geom_bar(position = "dodge") +
   labs(title = "Zakup roweru a region", x = "Region", y = "Liczba osób") +
   theme_minimal()
@@ -535,12 +538,12 @@ shapiro.test(dane$Age)
 
 # Wybieramy Test Kruskala-Wallisa, ponieważ p < 0.05, więc odrzucamy hipotezę zerową o normalności rozkładu.
 # Dane Age NIE są normalnie rozkłócone!
-kruskal.test(Age ~ `Purchased Bike`, data = dane)
+kruskal.test(Age ~ `Purchased.Bike`, data = dane)
 
 # Wizualizacja testów (typ: "nonparametric" zamiast "parametric")
 ggbetweenstats(
   data = dane,
-  x = `Purchased Bike`,  
+  x = `Purchased.Bike`,  
   y = Age,              
   type = "nonparametric",   
   title = "Wiek a decyzja o zakupie roweru",
