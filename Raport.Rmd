@@ -211,18 +211,18 @@ colnames(dane_mice) <- make.names(colnames(dane_mice))  # Zamiana spacji na krop
 imputed_data <- mice(dane_mice, m = 5, method = 'pmm', seed = 123)
 
 # Konwersja z powrotem do pełnych danych
-dane2 <- complete(imputed_data)
+dane <- complete(imputed_data)
 
 # Wizualizacja imputacji
 plot(imputed_data)
 
 # Przywrócenie oryginalnych nazw kolumn
-colnames(dane2) <- colnames(dane)
+colnames(dane) <- colnames(dane)
 
 # Sprawdzenie czy wszystko działa
-print(head(dane2))
-summary(dane2)  # Podsumowanie danych po imputacji
-colSums(is.na(dane2))  
+print(head(dane))
+summary(dane)  # Podsumowanie danych po imputacji
+colSums(is.na(dane))  
 
 
 ```
@@ -231,6 +231,7 @@ colSums(is.na(dane2))
 
 ```{r}
 # Imputacja wielowymiarowa dla zmiennych kategorycznych
+categorical_vars <- gsub(" ", ".", categorical_vars)
 categorical_data <- dane %>% select(all_of(categorical_vars))
 imputed_data <- mice(categorical_data, m = 5, method = "logreg", seed = 123)
 dane[categorical_vars] <- complete(imputed_data)
@@ -262,7 +263,7 @@ Poniższe wykresy przedstawiają rozkłady danych dla wybranych zmiennych katego
 
 ```{r}
 # `Marital Status`
-ggplot(dane, aes(x = `Marital Status`)) +
+ggplot(dane, aes(x = `Marital.Status`)) +
   geom_bar() +
   labs(title = "Rozkład stanu cywilnego", x = "Stan cywilny", y = "Liczba osób")
 # `Gender`
@@ -270,7 +271,7 @@ ggplot(dane, aes(x = `Gender`)) +
   geom_bar() +
   labs(title = "Rozkład płci", x = "Płeć", y = "Liczba osób")
 # `Home Owner`
-ggplot(dane, aes(x = `Home Owner`)) +
+ggplot(dane, aes(x = `Home.Owner`)) +
   geom_bar() +
   labs(title = "Rozkład własności domu", x = "Czy posiada dom", y = "Liczba osób")
 
@@ -405,7 +406,7 @@ train_index <- sample(seq_len(nrow(dane)), size = 0.7 * nrow(dane))
 train_data <- dane[train_index, ]
 test_data <- dane[-train_index, ]
 # Budowa modelu
-log_model <- glm(`Purchased Bike` ~ ., data = train_data, family = binomial)
+log_model <- glm(`Purchased.Bike` ~ ., data = train_data, family = binomial)
 summary(log_model)
 
 ```
