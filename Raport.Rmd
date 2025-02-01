@@ -127,7 +127,7 @@ proportions <- dane %>%
   pivot_longer(cols = everything(), names_to = "Kategoria", values_to = "Tabela") %>%
   unnest(Tabela)
 
-print(n=29, proportions)
+proportions %>% print(n = Inf)
 ```
 
 ## Wizualizacja braków danych
