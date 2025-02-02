@@ -495,8 +495,7 @@ Wniosek: Osoby zamężne/żonate kupują rowery w inny sposób niż osoby samotn
 
 P-value = 0.001032 (mniejsze niż 0.05) Istotna zależność -- region wpływa na zakup roweru.
 Wniosek: Mieszkańcy różnych regionów różnią się pod względem liczby zakupionych rowerów.
-### Która grupa częściej kupuje rowery?
-### Zakup roweru a stan cywilny
+
 
 ```{r}
 table(dane$`Purchased.Bike`, dane$`Marital.Status`)
